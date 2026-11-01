@@ -8,6 +8,7 @@
 | [L00](L00-environment.md) | 环境与烧录：PlatformIO + DAPLink | 2026-11-01 | ✅ |
 | [L01](L01-gpio-blink.md) | GPIO 点灯与 BSRR 位操作 | 2026-11-01 | ✅ |
 | [L02](L02-clock-systick.md) | 时钟树与 SysTick 精确延时 | 2026-11-01 | ✅ |
+| [L02 作业](L02-homework.md) | 总线 / PLL 计算 / SysTick 实验 | 2026-11-01 | ⬜ |
 | L03 | 按键消抖与状态机 | 计划中 | ⬜ |
 | L04 | UART 收发与 printf 重定向 | 计划中 | ⬜ |
 | L05 | 环形缓冲区上板 | 计划中 | ⬜ |
