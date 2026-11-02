@@ -13,12 +13,14 @@
 
 | 总线 | 挂载的外设 |
 | --- | --- |
-| AHB1 | |
-| AHB2 | |
-| APB1 | |
-| APB2 | |
+| AHB1 | GPIO，USB，DMA1、2 |
+| AHB2 | 摄像头 |
+| APB1 | USART2、3，I2C |
+| APB2 | USART1，SPI1，ADC |
 
 **A2** 回答：`GPIOA` / `GPIOE` 挂在哪条总线？`USART1` 呢？`TIM2` 呢？
+
+GPIO作为输入输出，要在AHB高速通道上，
 
 **A3** 为什么 GPIO 挂在 AHB（高速）而不是 APB（低速）？提示：从「访问频率」和「一次点灯要写几个寄存器」两个角度想。
 
