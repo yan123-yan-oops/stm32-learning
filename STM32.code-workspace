@@ -1,0 +1,16 @@
+{
+  "folders": [
+    { "path": "00-pio-blink" },
+    { "path": "01-key-led" },
+    { "path": "02-systick" },
+    { "path": "03-key-fsm" },
+    { "path": "lessons" }
+  ],
+  "settings": {
+    "C_Cpp.default.cppStandard": "c11",
+    "files.associations": {
+      "*.h": "c",
+      "*.c": "c"
+    }
+  }
+}

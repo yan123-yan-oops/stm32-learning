@@ -10,10 +10,10 @@
 | [L02](L02-clock-systick.md) | 时钟树与 SysTick 精确延时 | 2026-11-01 | ✅ |
 | [L02 作业](L02-homework.md) | 总线 / PLL 计算 / SysTick 实验 | 2026-11-01 | ⬜ |
 | [L03](L03-key-fsm.md) | 按键消抖与状态机 | 2026-11-02 | ✅ |
-| L04 | UART 收发与 printf 重定向 | 计划中 | ⬜ |
-| L05 | 环形缓冲区上板 | 计划中 | ⬜ |
-| L06 | NMEA 逐字节解析上板 | 计划中 | ⬜ |
-| L07 | ADC + DMA 双缓冲采集 | 计划中 | ⬜ |
+| [L04](L04-uart-loopback.md) | UART 自发自收与命令解析 | 2026-11-02 | ⬜ |
+| [L05](L05-ringbuffer.md) | 环形缓冲上板（合并进 L04） | 2026-11-02 | ✅ |
+| [L06](L06-nmea-on-board.md) | NMEA 逐字节解析上板 | 计划中 | ⬜ |
+| [L07](L07-adc-dma.md) | ADC + DMA 双缓冲采集 | 计划中 | ⬜ |
 
 ## 怎么复习
 
