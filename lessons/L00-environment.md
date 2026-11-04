@@ -1,52 +1,76 @@
-# L00 · 环境与烧录：PlatformIO + DAPLink
+# L00 · 环境与烧录：从零到"灯闪"
 
-> 日期：2026-11-01 ｜ 目标：从零到「灯闪」，并且知道失败时怎么查。
+> 日期：2026-11-01 ｜ 30 分钟 ｜ 硬件：核心板 + DAPLink + 4 根杜邦线
 
-## 今天解决了什么
+## ① 本节要学到什么
 
-- 用 **PlatformIO（VS Code）** 替代 Keil，工具链自动下载，无授权问题；
-- 板卡 ID：`vccgnd_f407zg_mini`（同款 F407ZGT6，官方支持 `cmsis-dap`）；
-- 第一次烧录成功：`Programming Finished → Verified OK → SUCCESS`。
+1. 说清 **SWD 四根线**各干什么，以及为什么 `3V3` 不能省（VTREF）；
+2. 知道 **板卡 ID** `vccgnd_f407zg_mini` 和 `upload_protocol = cmsis-dap` 的关系；
+3. 看懂烧录日志里的**三行成功标志**，而不是靠"灯亮没亮"猜；
+4. 遇到 `examination failed` / `cannot read IDR` 时，能**按表定位**，不瞎试。
 
-## 关键概念
+## ② 怎么学（30 分钟）
 
-| 概念 | 说明 |
-| --- | --- |
-| SWD | 两线调试：`SWDIO`(PA13) + `SWCLK`(PA14)，加上 GND 就能通信 |
-| VTREF | 调试器用目标板电压做电平参考；**不接就时好时坏** |
-| CMSIS-DAP | DAPLink 使用的调试协议，OpenOCD 通过它访问芯片 |
-| OpenOCD | PlatformIO 调用的烧录/调试后端 |
-| `upload_protocol` | 决定用哪种探针，本项目是 `cmsis-dap` |
-
-## 接线（实测有效）
-
-```
-DAPLink 3V3  →  板子 3V3     ← 既是 VTREF，也是唯一电源
-DAPLink SWDIO→  板子 DIO     (PA13)
-DAPLink SWCLK→  板子 CLK     (PA14)
-DAPLink GND  →  板子 GND
-Type-C：不插（两路电源会冲突）
-```
-
-## 踩坑记录（都是真机踩出来的）
-
-| 现象 | 原因 | 结论 |
+| 时间 | 做什么 | 关键点 |
 | --- | --- | --- |
-| `Failed to read memory at 0xE000ED00` → `examination failed` | 只接了 DIO/CLK/GND，DAP 缺 VTREF | **必须接 3V3** |
-| `Error connecting DP: cannot read IDR` | DIO/CLK 接反 | 这条报错基本可判定线接反 |
-| 按住复位不放，还是 `examination failed` | 内核一直被摁在复位里 | 「按住复位」要配合时序，不是按着不放 |
-| 第一次 Upload 卡在下载 | 在装 OpenOCD（约 100 MB） | 等它装完，别重复点 |
+| 5 min | 读下面的接线表 | 记住 `3V3` 是参考电压，不只是供电 |
+| 10 min | 接线，打开设备管理器确认 **CMSIS-DAP** 出现 | 有黄色感叹号 → 装 `【5】下载器驱动` |
+| 10 min | 打开 `00-pio-blink` → Build → Upload | 第一次会下载工具链，等它装完 |
+| 5 min | 拔插一次，重复 Upload | 确认不是"碰巧成功" |
 
-## 自测三题
+卡住 20 分钟就停，把日志最后 10 行发我。
 
-1. 为什么 DAP 只接三根线（DIO/CLK/GND）会失败？
-2. 看到 `cannot read IDR` 和 `examination failed`，分别先查什么？
-3. 为什么接 DAP 3V3 之后不能再插 Type-C？
+## ③ 动手
+
+### 接线（实测有效）
+
+```
+DAPLink 3V3   →  板子 3V3      ← VTREF + 供电，接了这个就别插 Type-C
+DAPLink SWDIO →  板子 DIO      (PA13)
+DAPLink SWCLK →  板子 CLK      (PA14)
+DAPLink GND   →  板子 GND
+```
+
+### 验收标准
+
+日志里必须出现这三行（顺序固定）：
+
+```
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+========================= [SUCCESS] =========================
+```
+
+同时 PC13 绿灯开始闪。
+
+### 实验：复现一次失败
+
+把 `3V3` 拔掉，再 Upload 一次：
+
+- 预期报错：`Failed to read memory at 0xE000ED00` → `examination failed`
+- 结论：**DP 能连上不代表能读内核**，VTREF 缺失就是这个症状。
+- 接回去，确认恢复。
+
+## ④ 自测三题
+
+1. SWD 最少需要几根线？分别是哪几根？
+2. 为什么只接 DIO/CLK/GND 会失败？
+3. `cannot read IDR` 和 `examination failed` 分别先怀疑什么？
 
 <details><summary>参考答案</summary>
 
-1. 缺 VTREF，调试器不知道目标电平，SWD 信号不可靠。
-2. `cannot read IDR` → 先怀疑 DIO/CLK 接反；`examination failed` → 先怀疑 VTREF/供电。
-3. 板子 5V 与 3V3 两路供电同时存在会倒灌，原理图明确要求二选一。
+1. 三根即可通信（SWDIO、SWCLK、GND），但**供电/VTREF** 要另外解决，实际接四根。
+2. 缺 VTREF，DAP 不知道目标电平，SWD 信号不可靠。
+3. `cannot read IDR` → 先怀疑 DIO/CLK 接反；`examination failed` → 先怀疑 VTREF/供电。
 
 </details>
+
+## 踩坑记录
+
+| 现象 | 原因 | 处理 |
+| --- | --- | --- |
+| `Error connecting DP: cannot read IDR` | DIO/CLK 接反 | 对调两根线 |
+| `Failed to read memory at 0xE000ED00` | 缺 VTREF（没接 3V3） | 接上 3V3，拔掉 Type-C |
+| 按住复位不放还是失败 | 内核被摁在复位里 | 那是"按住"不是"connect under reset" |
+| 第一次 Upload 卡住 | 在下载 OpenOCD（约 100 MB） | 等，别重复点 |

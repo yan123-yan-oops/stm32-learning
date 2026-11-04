@@ -1,12 +1,14 @@
 # 00-pio-blink — 第一个 PlatformIO 工程
 
+> 对应课时：[L00 环境与烧录](../lessons/L00-environment.md) · [L01 GPIO 与 BSRR](../lessons/L01-gpio-blink.md)
+
 板子：鹿小班 STM32F407ZGT6 核心板 · LED = PC13（低电平亮）· 调试器 DAPLink
 
 ## 一次性准备
 
 1. VS Code 装扩展 **PlatformIO IDE**（第一次启动会自动下载 Python 与工具链，约几分钟）。
-2. 板子 **Type-C 接电脑**供电（电源指示灯亮）。
-3. DAPLink 接 `SWCLK / SWDIO / GND` 三根到板子的 DIO/CLK/GND，不要接 3V3。
+2. DAPLink 的 `3V3` 接到板子 `3V3`（**VTREF + 供电**），接了就**不要**再插 Type-C。
+3. DAPLink 的 `SWDIO → DIO`、`SWCLK → CLK`、`GND → GND`。
 
 ## 打开与烧录
 

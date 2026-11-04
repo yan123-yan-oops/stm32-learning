@@ -16,14 +16,24 @@
 ## 目录
 
 ```
-├── lessons/            每课一份要点（复习看这里）
-│   ├── L00-environment.md      环境与烧录、SWD 排错
-│   ├── L01-gpio-blink.md       GPIO 与 BSRR
-│   └── L02-clock-systick.md    时钟树与 SysTick
-├── 00-pio-blink/       第一个工程：PC13 闪烁
-├── 01-key-led/         按键控制 LED
-└── 02-systick/         168 MHz 时钟配置 + 1 ms 延时基准
+├── lessons/              课时笔记（复习看这里）
+│   ├── README.md         索引：L00–L05 + 待上课程
+│   ├── TEACHING-FORMAT.md  每节课的固定四段格式
+│   ├── L00-environment.md      环境、SWD/VTREF、烧录排错
+│   ├── L01-gpio-blink.md       GPIO 四步、BSRR 原子性
+│   ├── L02-clock-systick.md    时钟树、PLL、SysTick
+│   ├── L03-key-fsm.md          按键消抖、四状态机
+│   ├── L04-uart-loopback.md    UART 回环、命令解析
+│   └── L05-ringbuffer.md       环形缓冲（已并入 L04 代码）
+├── homework/             作业与批改（每题一份）
+├── 00-pio-blink/         L00/L01：点灯
+├── 01-key-led/           L03 的早期版本：阻塞式消抖
+├── 02-systick/           L02：168 MHz + 1 ms 基准
+├── 03-key-fsm/           L03：定时采样 + 状态机
+└── 04-uart-loopback/     L04：UART 自发自收
 ```
+
+**约定**：工程目录编号 = 课程顺序；每个工程里的 `README.md` 都指向对应课时笔记。
 
 ## 环境
 
