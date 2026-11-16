@@ -132,6 +132,51 @@ PlatformIO → **Debug** → 暂停，在 Watch 里加：
 
 </details>
 
+### 用 PlatformIO Debug 看变量（一步不落）
+
+**准备**
+
+1. 接线：DAP `3V3→3V3`、`SWDIO→DIO`、`SWCLK→CLK`、`GND→GND`；**不要插 Type-C**。
+2. VS Code「文件 → 打开文件夹」选 `05-freertos` 这一层（不是 `STM32` 根目录）。
+3. 等左下角出现 PlatformIO 状态栏（✓ 编译、⌁ 调试图标）。
+
+**启动调试**
+
+4. 按 **F5**；或点左侧「运行和调试」图标（Ctrl+Shift+D），顶部下拉选 `PlatformIO Debug (f407zg)`。
+5. 第一次会先编译、再烧录，然后停在 `main()` 第一行（PIO 默认在 main 下断点）。
+
+**加 Watch**
+
+6. 左侧「运行和调试」面板 → **WATCH** → 点 `+` → 输入变量名 → 回车。
+7. 依次加：`g_led_ticks`、`g_produced`、`g_consumed`、`g_stack_led`、`g_stack_prod`、`g_stack_cons`。
+8. 按 **F5 继续**跑 5 秒，再按暂停（F6）。看数值：
+   - `g_led_ticks` ≈ 运行秒数 × 2；
+   - `g_produced` ≥ `g_consumed`；
+   - `g_stack_*` 是"历史最小剩余栈"，单位 word（×4 = 字节）。
+
+**看不到变量时**
+
+- 这三个变量是 `static`，GDB 里换个写法：`'main.c'::g_led_ticks`；
+- 确认是 Debug 启动（PIO 会自动用 `-Og -g`），不是普通 Upload；
+- 若被优化掉，在 `platformio.ini` 加 `build_type = debug` 再试。
+
+**看任务栈的另一种方式**
+
+在 WATCH 里直接输入 `uxTaskGetStackHighWaterMark(NULL)` 回车，GDB 会在目标上执行一次函数返回当前值。
+注意它返回的是"当前被暂停的那个任务"的水位；想知道别的任务，需要先切任务上下文（GDB 的 FreeRTOS 感知属于进阶话题）。
+
+## ⑦ 你要能背下来的"移植清单"（面试直接问）
+
+1. **内核源码**：`tasks.c`、`queue.c`、`list.c`、`port.c`（ARM_CM4F）、`heap_4.c`
+2. **头文件路径**：`Source/include` + `portable/GCC/ARM_CM4F`
+3. **`FreeRTOSConfig.h`**：tick 频率、最大优先级、堆大小、`configMAX_SYSCALL_INTERRUPT_PRIORITY`
+4. **异常向量映射**：`vPortSVCHandler→SVC_Handler`、`xPortPendSVHandler→PendSV_Handler`、`xPortSysTickHandler→SysTick_Handler`
+5. **中断优先级**：数值 ≤ 5 的中断不能调内核 API
+6. **编译/链接选项一致**：`-mfpu=fpv4-sp-d16 -mfloat-abi=hard` 必须同时出现在编译和链接里
+7. **启动顺序**：`xTaskCreate` → `vTaskStartScheduler` → SVC → 第一个任务
+
+这七条就是"你移植过 FreeRTOS"的完整证据链。
+
 ## 和 JD 的对应
 
 做完这课，简历技能段可以加一行：

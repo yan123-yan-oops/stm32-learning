@@ -86,6 +86,11 @@ static volatile uint32_t g_led_ticks   = 0;
 static volatile uint32_t g_produced    = 0;
 static volatile uint32_t g_consumed    = 0;
 
+/* 栈水位：每个任务记录自己"历史最小剩余栈"（单位 word），调试时看这三个 */
+static volatile uint32_t g_stack_led   = 0;
+static volatile uint32_t g_stack_prod  = 0;
+static volatile uint32_t g_stack_cons  = 0;
+
 /* ------------------------------------------------------------------ */
 /* 任务 1：LED 慢闪                                                    */
 /* ------------------------------------------------------------------ */
@@ -95,6 +100,7 @@ static void vLedTask(void *param)
     for (;;) {
         led_toggle();
         g_led_ticks++;
+        g_stack_led = uxTaskGetStackHighWaterMark(NULL);
         vTaskDelay(pdMS_TO_TICKS(500));         /* 500 ms，期间 CPU 让给别人 */
     }
 }
@@ -114,6 +120,7 @@ static void vProducerTask(void *param)
         /* 队列满时最多等 100 ms，超时就丢弃——不阻塞生产节奏 */
         (void)xQueueSend(g_queue, &value, pdMS_TO_TICKS(100));
 
+        g_stack_prod = uxTaskGetStackHighWaterMark(NULL);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
@@ -130,6 +137,7 @@ static void vConsumerTask(void *param)
         /* portMAX_DELAY：队列空就一直睡，不占 CPU */
         if (xQueueReceive(g_queue, &value, portMAX_DELAY) == pdPASS) {
             g_consumed++;
+            g_stack_cons = uxTaskGetStackHighWaterMark(NULL);
             if ((g_consumed % 5u) == 0u) {      /* 每 5 个做一次快速双闪 */
                 led_on();  vTaskDelay(pdMS_TO_TICKS(80));
                 led_off(); vTaskDelay(pdMS_TO_TICKS(80));
